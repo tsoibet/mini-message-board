@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Message } from '@/dataStore';
-import styles from '@/styles/index.module.css';
 
 export default function Home () {
 
@@ -53,34 +52,40 @@ export default function Home () {
   };
 
   return (
-    <div className={styles.main}>
-      <h1 className={styles.heading}>Mini Message Board</h1>
-      <form className={styles.form} onSubmit={async (event) => {
+    <div className="main">
+      <h1 className="heading">Mini Message Board</h1>
+      <form className="form" onSubmit={async (event) => {
           event.preventDefault();
           await addMessage();
         }}>
-        <div className={styles.inputs}>
-          <label className={styles.label} htmlFor='name'>
+        <div className="inputs">
+          <label className="label" htmlFor='name'>
             Name
           </label>
-          <input className={styles.input} id='name' type='text' maxLength={20} autoComplete="off" placeholder="Name" onChange={(event) => setNameInput(event.target.value)} value={nameInput}/>
-          <label className={styles.label} htmlFor='message'>
+          <input className="input" id='name' type='text' maxLength={20} autoComplete="off" placeholder="Name" onChange={(event) => setNameInput(event.target.value)} value={nameInput}/>
+          <label className="label" htmlFor='message'>
             Message
           </label>
-          <textarea className={styles.input} id='message' rows={4} cols={60} maxLength={240} placeholder='Message' onChange={(event) => setMessageInput(event.target.value)} value={messageInput} required/>
+          <textarea className="input" id='message' rows={4} cols={55} maxLength={240} placeholder='Message' onChange={(event) => setMessageInput(event.target.value)} value={messageInput} required/>
         </div>
-        <button className={styles.button} type="submit" disabled={isLoading}>Send</button>
-        <div className={styles.error}>
+        <button className="button" type="submit" disabled={isLoading}>Send</button>
+        <div className="error">
           {errMsg}
         </div>
       </form>
-      <div className={styles.messages}>
+      <div className="messages">
         {messages.map(message => {
           return (
-            <div className={styles.message} key={message._id}>
-              <p className={styles.user}>{message.user}</p>
-              <p className={styles.messageText}>{message.text}</p>
-              <p className={styles.datetime}>{new Date(message.added).toLocaleString()}</p>
+            <div className="message" key={message._id}>
+              <div className="user">
+                {message.user}
+              </div>
+              <div className="messageText">
+                {message.text}
+              </div>
+              <div className="datetime">
+                {new Date(message.added).toLocaleString()}
+              </div>
             </div>
           )
         })}
