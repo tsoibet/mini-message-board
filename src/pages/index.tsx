@@ -6,16 +6,17 @@ export default function Home () {
 
   const [messages, setMessages] = useState<Message[]>([]);
 
+  async function getMessages() {
+    try {
+      const res = await fetch('./api/message');
+      const data = await res.json();
+      setMessages(data);
+    } catch (error) {
+      console.error("Error retrieving data: ", error);
+    }
+  };
+
   useEffect(() => {
-    async function getMessages() {
-      try {
-        const res = await fetch('./api/message');
-        const data = await res.json();
-        setMessages(data);
-      } catch (error) {
-        console.error("Error retrieving data: ", error);
-      }
-    };
     getMessages();
   }, []);
 
@@ -42,8 +43,7 @@ export default function Home () {
       if (!res.ok) {
         throw new Error('Failed to add message. Please try again.')
       }
-      const data = await res.json();
-      setMessages(data);
+      getMessages();
       setMessageInput("");
     } catch (error) {
       setErrMsg(error.message);
@@ -75,9 +75,9 @@ export default function Home () {
         </div>
       </form>
       <div className={styles.messages}>
-        {messages.map((message, index) => {
+        {messages.map(message => {
           return (
-            <div className={styles.message} key={index}>
+            <div className={styles.message} key={message._id}>
               <p className={styles.user}>{message.user}</p>
               <p className={styles.messageText}>{message.text}</p>
               <p className={styles.datetime}>{new Date(message.added).toLocaleString()}</p>

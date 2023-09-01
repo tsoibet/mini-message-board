@@ -1,15 +1,15 @@
-import { Message, messages } from '@/dataStore';
+import connectToDb, { Message } from '@/dataStore';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-export default function handler (
+export default async function handler (
   req: NextApiRequest,
   res: NextApiResponse<Message[] | Message>
 ) {
   if (req.method === 'GET') {
-    const sortedslicedMessages = messages.slice(-10).sort((a, b) => b.added - a.added);
-    res.status(200).json(sortedslicedMessages);
+    const db = await connectToDb();
+    const result = await db.collection('messages').find().sort({ "added": -1 }).limit(10).toArray();
+    res.status(200).json(result);
   } else if (req.method === 'POST') {
-    console.log(req.body)
     const message = req.body.message;
     const user = req.body.user;
     const newMessage = {
@@ -17,8 +17,8 @@ export default function handler (
       user: user,
       added: Date.now()
     };
-    messages.push(newMessage);
-    const sortedslicedMessages = messages.slice(-10).sort((a, b) => b.added - a.added);
-    res.status(200).json(sortedslicedMessages);
+    const db = await connectToDb();
+    const result = await db.collection('messages').insertOne(newMessage);
+    res.status(201).json(result.insertedId);
   }
 }
