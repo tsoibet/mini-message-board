@@ -1,17 +1,24 @@
 import { useEffect, useState } from 'react';
-import { Message } from '@/dataStore';
+import { Message } from '@/utils/database';
 
 export default function Home () {
 
   const [messages, setMessages] = useState<Message[]>([]);
+  const [boardErrMsg, setBoardErrMsg] = useState("");
 
   async function getMessages() {
     try {
       const res = await fetch('./api/message');
-      const data = await res.json();
-      setMessages(data);
+      if (res.ok) { 
+        setFormErrMsg("");
+        const data = await res.json();
+        setMessages(data);
+      } else {
+        throw new Error();
+      }
     } catch (error) {
-      console.error("Error retrieving data: ", error);
+      setMessages([]);
+      setBoardErrMsg("Temporarily unavailable. Please visit again later.");
     }
   };
 
@@ -22,11 +29,11 @@ export default function Home () {
   const [nameInput, setNameInput] = useState<string>("");
   const [messageInput, setMessageInput] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [errMsg, setErrMsg] = useState<string>("");
+  const [formErrMsg, setFormErrMsg] = useState<string>("");
 
   async function addMessage() {
     setIsLoading(true);
-    setErrMsg("");
+    setFormErrMsg("");
     const userName = nameInput ? nameInput : "Anonymous user";
     try {
       const res = await fetch('./api/message', {
@@ -40,12 +47,12 @@ export default function Home () {
         })
       });
       if (!res.ok) {
-        throw new Error('Failed to add message. Please try again.')
+        throw new Error();
       }
       getMessages();
       setMessageInput("");
     } catch (error) {
-      setErrMsg(error.message);
+      setFormErrMsg('Failed to add message. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -68,13 +75,16 @@ export default function Home () {
           </label>
           <textarea className="input" id='message' rows={4} cols={55} maxLength={240} placeholder='Message' onChange={(event) => setMessageInput(event.target.value)} value={messageInput} required/>
         </div>
-        <button className="button" type="submit" disabled={isLoading}>Send</button>
-        <div className="error">
-          {errMsg}
+        <button className="button" type="submit" disabled={isLoading || boardErrMsg.length > 0}>Send</button>
+        <div className="form error">
+          {formErrMsg}
         </div>
       </form>
       <div className="messages">
-        {messages.map(message => {
+        <div className='board error'>
+          {boardErrMsg}
+        </div>
+        {messages && messages.map(message => {
           return (
             <div className="message" key={message._id}>
               <div className="user">
