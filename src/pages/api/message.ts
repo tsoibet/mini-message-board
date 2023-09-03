@@ -1,4 +1,4 @@
-import connectToDb, { Message } from '@/utils/database';
+import connectToDb from '@/utils/database';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function handler (
@@ -9,14 +9,18 @@ export default async function handler (
     try {
       const db = await connectToDb();
       const result = await db.collection('messages').find().sort({ "added": -1 }).limit(10).toArray();
-      res.status(200).json(result);
+      return res.status(200).json(result);
     } catch(error) {
-      res.status(500).json((error as Error).message);
+      return res.status(500).json((error as Error).message);
     }
   } else if (req.method === 'POST') {
     try {
-      const message = req.body.message;
+      const message = req.body.message.trim();
       const user = req.body.user;
+      if (!message || message.length > 240 || !user || user.length > 20) {
+        console.log("Invalid input");
+        return res.status(400).json("Invalid input");
+      }
       const newMessage = {
         text: message,
         user: user,
@@ -24,9 +28,9 @@ export default async function handler (
       };
       const db = await connectToDb();
       const result = await db.collection('messages').insertOne(newMessage);
-      res.status(201).json(result.insertedId);
+      return res.status(201).json(result.insertedId);
     } catch(error) {
-      res.status(500).json((error as Error).message);
+      return res.status(500).json((error as Error).message);
     }
   }
 }
