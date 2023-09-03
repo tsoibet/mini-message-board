@@ -4,9 +4,11 @@ import { Message } from '@/utils/database';
 export default function Home () {
 
   const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [boardErrMsg, setBoardErrMsg] = useState("");
 
   async function getMessages() {
+    setIsLoading(true);
     try {
       const res = await fetch('./api/message');
       if (res.ok) { 
@@ -19,6 +21,8 @@ export default function Home () {
     } catch (error) {
       setMessages([]);
       setBoardErrMsg("Temporarily unavailable. Please visit again later.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -28,11 +32,11 @@ export default function Home () {
 
   const [nameInput, setNameInput] = useState<string>("");
   const [messageInput, setMessageInput] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
   const [formErrMsg, setFormErrMsg] = useState<string>("");
 
   async function addMessage() {
-    setIsLoading(true);
+    setIsUploading(true);
     setFormErrMsg("");
     const userName = nameInput ? nameInput : "Anonymous user";
     try {
@@ -54,7 +58,7 @@ export default function Home () {
     } catch (error) {
       setFormErrMsg('Failed to add message. Please try again.');
     } finally {
-      setIsLoading(false);
+      setIsUploading(false);
     }
   };
 
@@ -75,7 +79,7 @@ export default function Home () {
           </label>
           <textarea className="input" id='message' rows={4} cols={55} maxLength={240} placeholder='Message' onChange={(event) => setMessageInput(event.target.value)} value={messageInput} required/>
         </div>
-        <button className="button" type="submit" disabled={isLoading || boardErrMsg.length > 0}>Send</button>
+        <button className="button" type="submit" disabled={isUploading || boardErrMsg.length > 0}>Send</button>
         <div className="form error">
           {formErrMsg}
         </div>
@@ -84,6 +88,7 @@ export default function Home () {
         <div className='board error'>
           {boardErrMsg}
         </div>
+        {isLoading && <div className='loading'>Loading...</div>}
         {messages && messages.map(message => {
           return (
             <div className="message" key={message._id}>
